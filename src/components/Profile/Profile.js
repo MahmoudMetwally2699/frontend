@@ -8,7 +8,7 @@ import BookCard from '../BookCard';
 const Profile = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState({ username: '', email: '' });
-  const [reviews, setReviews] = useState([]);
+  const [reviews, setReviews] = useState([]); // Ensure reviews is initialized as an array
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -18,7 +18,7 @@ const Profile = () => {
         const userData = await userService.getUserProfile();
         setUser(userData.data);
         const userReviews = await reviewService.getUserReviews();
-        setReviews(userReviews.data);
+        setReviews(userReviews.data.reviews); // Access reviews array from the response data
         setLoading(false);
       } catch (error) {
         console.error('Error fetching user data:', error);

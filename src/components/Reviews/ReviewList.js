@@ -1,22 +1,31 @@
 import * as React from 'react';
-import { Grid, Container, Typography, Box } from '@mui/material';
+import { Grid, Container, Typography, Box, Pagination } from '@mui/material';
 import BookCard from '../BookCard';
 import reviewService from '../../services/reviewService';
 
 export default function ReviewList() {
   const [reviews, setReviews] = React.useState([]);
-  
-  React.useEffect(() => {
-    async function fetchUserReviews() {
-      try {
-        const response = await reviewService.getUserReviews();
-        setReviews(response.data);
-      } catch (error) {
-        console.error('Error fetching user reviews:', error);
-      }
+  const [totalPages, setTotalPages] = React.useState(1);
+  const [currentPage, setCurrentPage] = React.useState(1);
+
+  const fetchUserReviews = async (page) => {
+    try {
+      const response = await reviewService.getUserReviews(page);
+      setReviews(response.data.reviews);
+      setTotalPages(response.data.totalPages);
+      setCurrentPage(page);
+    } catch (error) {
+      console.error('Error fetching user reviews:', error);
     }
-    fetchUserReviews();
-  }, []);
+  };
+
+  React.useEffect(() => {
+    fetchUserReviews(currentPage);
+  }, [currentPage]);
+
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value);
+  };
 
   return (
     <Container sx={{ py: 8 }} maxWidth="md">
@@ -32,6 +41,9 @@ export default function ReviewList() {
           </Grid>
         ))}
       </Grid>
+      <Box display="flex" justifyContent="center" mt={4}>
+        <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} />
+      </Box>
     </Container>
   );
 }

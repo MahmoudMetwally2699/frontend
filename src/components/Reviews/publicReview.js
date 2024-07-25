@@ -1,24 +1,31 @@
 import * as React from 'react';
-import { Grid, Container, Typography, Button, Box } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { Grid, Container, Typography, Box, Pagination } from '@mui/material';
 import BookCard from '../BookCard';
 import reviewService from '../../services/reviewService';
 
 export default function PublicReviewList() {
   const [reviews, setReviews] = React.useState([]);
-  const navigate = useNavigate();
+  const [totalPages, setTotalPages] = React.useState(1);
+  const [currentPage, setCurrentPage] = React.useState(1);
+
+  const fetchReviews = async (page) => {
+    try {
+      const response = await reviewService.getReviews(page);
+      setReviews(response.data.reviews);
+      setTotalPages(response.data.totalPages);
+      setCurrentPage(page);
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+    }
+  };
 
   React.useEffect(() => {
-    async function fetchReviews() {
-      try {
-        const response = await reviewService.getReviews();
-        setReviews(response.data);
-      } catch (error) {
-        console.error('Error fetching reviews:', error);
-      }
-    }
-    fetchReviews();
-  }, []);
+    fetchReviews(currentPage);
+  }, [currentPage]);
+
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value);
+  };
 
   return (
     <Container sx={{ py: 8 }} maxWidth="lg">
@@ -26,7 +33,6 @@ export default function PublicReviewList() {
         <Typography variant="h4" gutterBottom>
           Book Reviews
         </Typography>
-        
       </Box>
       <Grid container spacing={4}>
         {reviews.map((review) => (
@@ -35,6 +41,9 @@ export default function PublicReviewList() {
           </Grid>
         ))}
       </Grid>
+      <Box display="flex" justifyContent="center" mt={4}>
+        <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} />
+      </Box>
     </Container>
   );
 }
