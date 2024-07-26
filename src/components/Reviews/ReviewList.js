@@ -1,30 +1,34 @@
 import * as React from 'react';
-import { Grid, Container, Typography, Box, Pagination } from '@mui/material';
+import { Grid, Container, Typography, Box, TextField } from '@mui/material';
+import Pagination from '@mui/material/Pagination';
 import BookCard from '../BookCard';
 import reviewService from '../../services/reviewService';
 
 export default function ReviewList() {
   const [reviews, setReviews] = React.useState([]);
+  const [search, setSearch] = React.useState('');
+  const [page, setPage] = React.useState(1);
   const [totalPages, setTotalPages] = React.useState(1);
-  const [currentPage, setCurrentPage] = React.useState(1);
-
-  const fetchUserReviews = async (page) => {
-    try {
-      const response = await reviewService.getUserReviews(page);
-      setReviews(response.data.reviews);
-      setTotalPages(response.data.totalPages);
-      setCurrentPage(page);
-    } catch (error) {
-      console.error('Error fetching user reviews:', error);
+  
+  React.useEffect(() => {
+    async function fetchUserReviews() {
+      try {
+        const response = await reviewService.getUserReviews(page, search);
+        setReviews(response.data.reviews);
+        setTotalPages(response.data.totalPages);
+      } catch (error) {
+        console.error('Error fetching user reviews:', error);
+      }
     }
+    fetchUserReviews();
+  }, [page, search]);
+
+  const handleSearchChange = (event) => {
+    setSearch(event.target.value);
   };
 
-  React.useEffect(() => {
-    fetchUserReviews(currentPage);
-  }, [currentPage]);
-
   const handlePageChange = (event, value) => {
-    setCurrentPage(value);
+    setPage(value);
   };
 
   return (
@@ -33,6 +37,13 @@ export default function ReviewList() {
         <Typography variant="h4" gutterBottom>
           My Book Reviews
         </Typography>
+        <TextField
+          label="Search"
+          variant="outlined"
+          value={search}
+          onChange={handleSearchChange}
+          sx={{ width: '30%' }}
+        />
       </Box>
       <Grid container spacing={4}>
         {reviews.map((review) => (
@@ -42,7 +53,12 @@ export default function ReviewList() {
         ))}
       </Grid>
       <Box display="flex" justifyContent="center" mt={4}>
-        <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} />
+        <Pagination
+          count={totalPages}
+          page={page}
+          onChange={handlePageChange}
+          color="primary"
+        />
       </Box>
     </Container>
   );

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://book-review-five.vercel.app/api/auth/'; // Adjust the URL to match your backend
+const API_URL = ' https://book-review-five.vercel.app/api/auth/'; // Adjust the URL to match your backend
 
 const register = (username, email, password) => {
     return axios.post(API_URL + 'register', { username, email, password });
